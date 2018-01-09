@@ -82,7 +82,7 @@ public class ClientBD extends ConnectionBD {
 	 * @return retourne vrais si le nom d'utilisateur et le mot de passe sont
 	 *         correct, faux sinon
 	 */
-	private boolean connectionClient(String username, String mdp) {
+	public boolean connectionClient(String username, String mdp) {
 		try {
 			String sql = "SELECT User FROM client WHERE User LIKE '" + username + "' AND MotDePasse LIKE '" + mdp + "'";
 			rs = st.executeQuery(sql);
@@ -109,7 +109,7 @@ public class ClientBD extends ConnectionBD {
 	 * @param motdepasse
 	 *            Mot de passe du client
 	 */
-	private void ajouterClient(String nom, String prenom, String user, String motdepasse) {
+	public void ajouterClient(String nom, String prenom, String user, String motdepasse) {
 		try {
 			if (checkUser(user)) {
 				String sql = "INSERT INTO `client` (`Nom`,`Prenom`, User, MotDePasse ) VALUES ('" + nom + "', '"

@@ -6,8 +6,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import bd.ClientBD;
+import bd.EnchereBD;
+import bd.ObjetBD;
 import messeges.Message;
 
 public class ServiceClient implements Runnable {
@@ -19,6 +23,7 @@ public class ServiceClient implements Runnable {
 	private String id;
 	private String login;
 	private String password;
+	private ClientBD cbd = new ClientBD();
 	private Message message;
 
 	private void terminer() {
@@ -72,6 +77,7 @@ public class ServiceClient implements Runnable {
 			while (true) {
 				try {
 					message_lu = flux_entrant.readLine();
+					messageListener(message_lu, ma_sortie);
 					message.addMessage(message_lu);
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
@@ -105,16 +111,15 @@ public class ServiceClient implements Runnable {
 	}
 
 	private void login(BufferedReader flux_entrant, PrintWriter ma_sortie) {
-		ClientBD cbd = new ClientBD();
 		ma_sortie.println("");
 		ma_sortie.println("Vous etez deja client chez nous? Oui/Non");
 		try {
 			String reponse = flux_entrant.readLine();
 			if (reponse.contains("Oui")) {
-				continuerLogin(flux_entrant, ma_sortie, cbd);
+				continuerLogin(flux_entrant, ma_sortie);
 			} else if (reponse.contains("Non")) {
-				creationNouveauClient(flux_entrant, ma_sortie, cbd);
-				continuerLogin(flux_entrant, ma_sortie, cbd);
+				creationNouveauClient(flux_entrant, ma_sortie);
+				continuerLogin(flux_entrant, ma_sortie);
 			} else {
 				ma_sortie.println("Response invalide, veuilles repondre par Oui ou Non!");
 				login(flux_entrant, ma_sortie);
@@ -124,7 +129,7 @@ public class ServiceClient implements Runnable {
 		}
 	}
 
-	private void creationNouveauClient(BufferedReader flux_entrant, PrintWriter ma_sortie, ClientBD cbd) {
+	private void creationNouveauClient(BufferedReader flux_entrant, PrintWriter ma_sortie) {
 		boolean confirm = false;
 		String nom = "", prenom = "", user = "", motdepasse = "", motdepasse2 = "";
 		do {
@@ -177,7 +182,7 @@ public class ServiceClient implements Runnable {
 				user, motdepasse));
 	}
 
-	private void continuerLogin(BufferedReader flux_entrant, PrintWriter ma_sortie, ClientBD cbd) {
+	private void continuerLogin(BufferedReader flux_entrant, PrintWriter ma_sortie) {
 		while (!cbd.connectionClient(login, password)) {
 			try {
 				ma_sortie.println("");
@@ -202,5 +207,64 @@ public class ServiceClient implements Runnable {
 		
 		message = new Message(cbd.getIdClient(),cbd.getNom(),cbd.getPrenom(), login, password);
 		System.out.format("[%s] : Client logged with login: %s and password: %s \n", id, login, password);
+	}
+	
+	private void messageListener(String message_lu, PrintWriter ma_sortie) {
+		String m = "Mettre ";
+		String r = "Retrait ";
+		String p = "Placer ";
+		String a = "Achat ";
+		String c = "Chercher ";
+		String e = "Auto Enrechir ";
+		String[] commande;
+		if (message_lu.startsWith(m)) {
+			//Mettre Titre Desscription categorie prix dateDeFin
+			message_lu = message_lu.replace(m,"");
+			commande = message_lu.split(" ");
+			if(commande.length != 5) {
+				ma_sortie.println("demande du client inconnue...");
+			}else {
+				ObjetBD gdb = new ObjetBD();
+				gdb.AjouterObjet(commande[0], commande[1], commande[2],cbd.getIdClient(),Integer.parseInt(commande[3]),commande[4]);
+				gdb.fermerCo();
+			}
+		}
+		if (message_lu.startsWith(r)) {
+			message_lu = message_lu.replace(r,"");
+			commande = message_lu.split(" ");
+		}
+		if (message_lu.startsWith(p)) {
+			//AjouterEnch(int idobj, int Offre, int ench)
+			message_lu = message_lu.replace(p,"");
+			commande = message_lu.split(" ");
+			if(commande.length != 2) {
+				ma_sortie.println("demande du client inconnue...");
+			}else {
+			EnchereBD ebd = new EnchereBD();
+			try {
+			boolean reussiteRequette = ebd.AjouterEnch(Integer.parseInt(commande[0]), Integer.parseInt(commande[1]), cbd.getIdClient());
+			if(reussiteRequette) {
+				ma_sortie.println("la demmande du client est pris en compte");
+			}else {
+				ma_sortie.println("L'offre donnée est inférieurs a l'offre en cours");
+			}
+			}catch(NumberFormatException ex) {
+				ma_sortie.println("la demmande du client est invalide");
+			}
+			}
+		}
+		if (message_lu.startsWith(a)) {
+			message_lu = message_lu.replace(a,"");
+			commande = message_lu.split(" ");
+		}
+		if (message_lu.startsWith(c)) {
+			message_lu = message_lu.replace(c,"");
+			commande = message_lu.split(" ");
+		}
+		if (message_lu.startsWith(e)) {
+			message_lu = message_lu.replace(e,"");
+			commande = message_lu.split(" ");
+		}
+
 	}
 }

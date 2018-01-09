@@ -20,7 +20,7 @@ public class EnchereBD extends ConnectionBD {
 
 	public static void main(String[] args) {
 		EnchereBD ebd = new EnchereBD();
-		ebd.AjouterEnch(5, 9, 1);
+		ebd.AjouterEnch(5, 14, 2);
 		// ebd.recupDerniEnchObj(5);
 		// ebd.recupOffre(5);
 		// System.out.println(ebd.getOffre());
@@ -75,24 +75,25 @@ public class EnchereBD extends ConnectionBD {
 	 * @param ench
 	 *            Identifiant de l'encherisseur
 	 */
-	public void AjouterEnch(int idobj, int Offre, int ench) {
+	public boolean AjouterEnch(int idobj, int Offre, int ench) {
 		ObjetBD obj = new ObjetBD();
 		if (!obj.aEnch(idobj)) {
 			obj.AjouterEnch(idobj);
 		}
 		this.recupOffre(idobj);
-		if (this.getOffre() == Offre) {
+		if (this.getOffre()< Offre) {
 			try {
 				String sql = "INSERT INTO `enchere` (`IdObj`,`Offre`, Encherisseur, DateEnchere) VALUES ('" + idobj
 						+ "', '" + Offre + "', '" + ench + "', NOW())";
 				st.executeUpdate(sql);
+				return true;
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		} else {
 			System.out.println("L'offre donnée est inférieurs a l'offre en cours");
 		}
-
+		return false;
 	}
 
 	/**

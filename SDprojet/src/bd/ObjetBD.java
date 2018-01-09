@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 
@@ -30,14 +32,12 @@ public class ObjetBD extends ConnectionBD {
 
 	public static void main(String[] args) {
 		ObjetBD gdb = new ObjetBD();
-		// gdb.AjouterObjet("HP ENVY","Ordinateur portable");
+		//gdb.AjouterObjet("HP ENVY","Ordinateur portable");
 		// gdb.lireEnBase();
 		// gdb.supprimerDansBase(2);
 		// gdb.modifierDescr(3, "Phone by Apple");
 		// gdb.lireEnBase();
-		// gdb.AjouterObjet("Hunger Games", "Le premier tome introduit Katniss Everdeen,
-		// une jeune fille de 16 ans originaire du District 12 qui se porte volontaire
-		// pour les 74e Hunger Games à la place de sa petite sœur Prim. ", "Livres");
+		//gdb.AjouterObjet("Hunger Games", "Le premier tome introduit Katniss Everdeen", "Livres",2,10,"2018-02-01");
 		// gdb.AffCatObjet(5);
 		// gdb.modifierPrix(5, 15);
 		// gdb.lireEnBase();
@@ -45,7 +45,6 @@ public class ObjetBD extends ConnectionBD {
 		// gdb.chargeInfo(5);
 		// System.out.println(gdb.getIdObjet());
 		gdb.fermerCo();
-
 	}
 
 	/**
@@ -81,16 +80,21 @@ public class ObjetBD extends ConnectionBD {
 	 * @param prix
 	 *            Prix de l'objet
 	 */
-	public void AjouterObjet(String titre, String descr, String cat, int idvendeur, int prix) {
+	public boolean AjouterObjet(String titre, String descr, String cat, int idvendeur, int prix,String dateFinEnchere) {
 		try {
 			CategorieBD catbd = new CategorieBD();
 			int catKey = catbd.recupIdAvecLib(cat);
-			String sql = "INSERT INTO `objet_en_vente` (`Titre`,`Description`,`IdCategorie`, 'Vendeur', 'Prix', 'DateMiseVente' ) VALUES ('"
-					+ titre + "', '" + descr + "', '" + catKey + "', '" + idvendeur + "', '" + prix + "', 'NOW()')";
+			
+			LocalDateTime ladate = LocalDateTime.now();
+			String datestring = ladate.format(DateTimeFormatter.ISO_DATE);
+			String sql = "INSERT INTO `objet_en_vente` (`Titre`,`Description`,`IdCategorie`, `Vendeur`, `Prix`, `DateMiseVente`,`DateFinEnchere` ) VALUES ('"
+					+ titre + "', '" + descr + "', '" + catKey + "', '" + idvendeur + "', '" + prix + "', '"+datestring+"', '"+dateFinEnchere+"')";
 			st.executeUpdate(sql);
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	/**

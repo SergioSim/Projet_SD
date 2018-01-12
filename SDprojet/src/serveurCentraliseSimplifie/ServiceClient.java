@@ -1,11 +1,13 @@
 package serveurCentraliseSimplifie;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -13,6 +15,7 @@ import bd.ClientBD;
 import bd.EnchereBD;
 import bd.ObjetBD;
 import messeges.Message;
+import env.secure.VerSig;
 
 public class ServiceClient implements Runnable {
 	// String to finish the communication -> ctrl-d
@@ -68,7 +71,7 @@ public class ServiceClient implements Runnable {
 		}
 
 		login(flux_entrant, ma_sortie);
-		String message_lu = new String();
+		String message_lu = null;
 		int line_num = 0;
 		// Fin de l initialisation
 		// Boucle principale
@@ -77,8 +80,14 @@ public class ServiceClient implements Runnable {
 			while (true) {
 				try {
 					message_lu = flux_entrant.readLine();
+					if (message_lu.toString().contains(Finish)) {
+						System.out.format("[%s] :  [%s] recu, Transmission finie\n", id, "CTRL-D");
+						ma_sortie.println("Fermeture de la connexion");
+						terminer();
+						return;
+					}
 					messageListener(message_lu, ma_sortie);
-					message.addMessage(message_lu);
+					message.addMessage(message_lu.toString());
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}
@@ -87,13 +96,7 @@ public class ServiceClient implements Runnable {
 					terminer();
 					return;
 				}
-				System.out.format("%s [line_%d]--> [%s]]\n", id, line_num, message_lu);
-				if (message_lu.contains(Finish)) {
-					System.out.format("[%s] :  [%s] recu, Transmission finie\n", id, message_lu);
-					ma_sortie.println("Fermeture de la connexion");
-					terminer();
-					return;
-				}
+				//System.out.format("%s [line_%d]--> [%s]]\n", login, line_num, message_lu);
 				line_num++;
 			}
 		}
@@ -209,7 +212,24 @@ public class ServiceClient implements Runnable {
 		System.out.format("[%s] : Client logged with login: %s and password: %s \n", id, login, password);
 	}
 	
-	private void messageListener(String message_lu, PrintWriter ma_sortie) {
+	private boolean validSignature(String msg, int id) {
+		//System.out.println("ID de la signature : " + id);
+		File publicKey = new File("public/" + this.login + "pubKey.pub");
+		VerSig validator = new VerSig(publicKey, id, msg);
+		if(validator.ValidSig()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private void deleteSignature(String msg, int id) {
+		File publicKey = new File("public/" + this.login + "pubKey.pub");
+		VerSig validator = new VerSig(publicKey, id, msg);
+		validator.deleteSig();
+	}
+	
+	private void messageListener(String tabStr, PrintWriter ma_sortie) {
 		String m = "Mettre ";
 		String r = "Retrait ";
 		String p = "Placer ";
@@ -217,54 +237,76 @@ public class ServiceClient implements Runnable {
 		String c = "Chercher ";
 		String e = "Auto Enrechir ";
 		String[] commande;
-		if (message_lu.startsWith(m)) {
-			//Mettre Titre Desscription categorie prix dateDeFin
-			message_lu = message_lu.replace(m,"");
-			commande = message_lu.split(" ");
-			if(commande.length != 5) {
-				ma_sortie.println("demande du client inconnue...");
-			}else {
-				ObjetBD gdb = new ObjetBD();
-				gdb.AjouterObjet(commande[0], commande[1], commande[2],cbd.getIdClient(),Integer.parseInt(commande[3]),commande[4]);
-				gdb.fermerCo();
+		String[] str = tabStr.split("//");
+		String message_lu = str[0];
+		int signature = 0;
+		if(str.length == 2) {
+			signature = Integer.parseInt(str[1]);
+		} else {
+			signature = -1;
+		}
+		
+		System.out.format("%s --> A fait : [%s]\n", login, message_lu);
+		
+		//System.out.println(message_lu);
+		//System.out.println(signature);		
+		//System.out.println(this.validSignature(message_lu, signature));
+		
+		if( (signature == -1) || (this.validSignature(message_lu, signature)) ) {
+//			System.out.println("Je suis le client nÂ°" + this.id + ", j'ai fais la commande " + message_lu + " qui a pour ID de signature : " + signature);
+			if(signature != -1) {
+				this.deleteSignature(message_lu, signature);
 			}
-		}
-		if (message_lu.startsWith(r)) {
-			message_lu = message_lu.replace(r,"");
-			commande = message_lu.split(" ");
-		}
-		if (message_lu.startsWith(p)) {
-			//AjouterEnch(int idobj, int Offre, int ench)
-			message_lu = message_lu.replace(p,"");
-			commande = message_lu.split(" ");
-			if(commande.length != 2) {
-				ma_sortie.println("demande du client inconnue...");
-			}else {
-			EnchereBD ebd = new EnchereBD();
-			try {
-			boolean reussiteRequette = ebd.AjouterEnch(Integer.parseInt(commande[0]), Integer.parseInt(commande[1]), cbd.getIdClient());
-			if(reussiteRequette) {
-				ma_sortie.println("la demmande du client est pris en compte");
-			}else {
-				ma_sortie.println("L'offre donnée est inférieurs a l'offre en cours");
+			if (message_lu.startsWith(m)) {
+				//Mettre Titre Desscription categorie prix dateDeFin
+				message_lu = message_lu.replace(m,"");
+				commande = message_lu.split(" ");
+				if(commande.length != 5) {
+					ma_sortie.println("demande du client inconnue...");
+				} else {
+					ObjetBD gdb = new ObjetBD();
+					gdb.AjouterObjet(commande[0], commande[1], commande[2],cbd.getIdClient(),Integer.parseInt(commande[3]),commande[4]);
+					gdb.fermerCo();
+				}
+			} if (message_lu.startsWith(r)) {
+				message_lu = message_lu.replace(r,"");
+				commande = message_lu.split(" ");
+			} if (message_lu.startsWith(p)) {
+				//Placer IdObjet Prix
+				//AjouterEnch(int idobj, int Offre, int ench)
+				message_lu = message_lu.replace(p,"");
+				commande = message_lu.split(" ");
+				if(commande.length != 2) {
+					ma_sortie.println("demande du client inconnue...");
+				} else {
+					EnchereBD ebd = new EnchereBD();
+					try {
+						boolean reussiteRequette = ebd.AjouterEnch(Integer.parseInt(commande[0]), Integer.parseInt(commande[1]), cbd.getIdClient());
+						if(reussiteRequette) {
+							ma_sortie.println("la demmande du client est pris en compte");
+						} else {
+							ma_sortie.println("L'offre donnï¿½e est infï¿½rieurs a l'offre en cours");
+						}
+					} catch(NumberFormatException ex) {
+						ma_sortie.println("la demmande du client est invalide");
+					}
+				}
+			} if (message_lu.startsWith(a)) {
+				message_lu = message_lu.replace(a,"");
+				commande = message_lu.split(" ");
+			} if (message_lu.startsWith(c)) {
+				message_lu = message_lu.replace(c,"");
+				commande = message_lu.split(" ");
+			} if (message_lu.startsWith(e)) {
+				message_lu = message_lu.replace(e,"");
+				commande = message_lu.split(" ");
+			} else {
+				//System.out.println(message_lu);
 			}
-			}catch(NumberFormatException ex) {
-				ma_sortie.println("la demmande du client est invalide");
-			}
-			}
+		} else {
+			ma_sortie.println("ERREUR : SIGNATURE DSA INVALIDE !!!");
+			System.out.println("ERREUR : SIGNATURE DSA INVALIDE !!!");
+//			System.out.println("Je suis le client nÂ°" + this.id + ", j'ai fais la commande " + message_lu + " qui a pour ID de signature : " + signature + ". Mais ca a plante.");
 		}
-		if (message_lu.startsWith(a)) {
-			message_lu = message_lu.replace(a,"");
-			commande = message_lu.split(" ");
-		}
-		if (message_lu.startsWith(c)) {
-			message_lu = message_lu.replace(c,"");
-			commande = message_lu.split(" ");
-		}
-		if (message_lu.startsWith(e)) {
-			message_lu = message_lu.replace(e,"");
-			commande = message_lu.split(" ");
-		}
-
 	}
 }

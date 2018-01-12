@@ -48,7 +48,7 @@ public class ObjetBD extends ConnectionBD {
 	}
 
 	/**
-	 * Permet d'ajouter un objet dans la base de donnée
+	 * Permet d'ajouter un objet dans la base de donnï¿½e
 	 * 
 	 * @param titre
 	 *            Titre de l'objet
@@ -67,7 +67,7 @@ public class ObjetBD extends ConnectionBD {
 	}
 
 	/**
-	 * Permet d'ajouter un objet dans la base de donnée
+	 * Permet d'ajouter un objet dans la base de donnï¿½e
 	 * 
 	 * @param titre
 	 *            Titre de l'objet
@@ -93,12 +93,12 @@ public class ObjetBD extends ConnectionBD {
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return false;
 		}
-		return false;
 	}
 
 	/**
-	 * Permet de lire toutes les informations présentes dans la base
+	 * Permet de lire toutes les informations prï¿½sentes dans la base
 	 */
 	public void afficherObjets() {
 		try {
@@ -107,7 +107,7 @@ public class ObjetBD extends ConnectionBD {
 			while (rs.next()) {
 				System.out.println("Identifiant de l'objet: " + rs.getString("IdObjet") + " Titre: "
 						+ rs.getString("Titre") + " Description: " + rs.getString("Description") + " Categorie: "
-						+ rs.getString("IdCategorie") + " Prix: " + rs.getString("Prix") + "€");
+						+ rs.getString("IdCategorie") + " Prix: " + rs.getString("Prix") + "ï¿½");
 			} // Vendeur, Ench, Prix, DateMiseVente, DateFinEnchere
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -28,7 +28,7 @@ public class EnchereBD extends ConnectionBD {
 	}
 
 	/**
-	 * Permet de récupérer une enchère grace a son identifiant
+	 * Permet de rï¿½cupï¿½rer une enchï¿½re grace a son identifiant
 	 * 
 	 * @param idEnch
 	 *            Identifiant de l'enchere
@@ -47,7 +47,7 @@ public class EnchereBD extends ConnectionBD {
 	}
 
 	/**
-	 * Permet de récupérer l'offre maximal d'un objet
+	 * Permet de rï¿½cupï¿½rer l'offre maximal d'un objet
 	 * 
 	 * @param idobj
 	 *            Identifiant d'un objet
@@ -66,7 +66,7 @@ public class EnchereBD extends ConnectionBD {
 
 	/**
 	 * Permet d'ajouter une enchere a un objet en controlant que l'offre est bien
-	 * suppérieur a celle actuel
+	 * suppï¿½rieur a celle actuel
 	 * 
 	 * @param idobj
 	 *            Identifiant de l'objet
@@ -91,13 +91,13 @@ public class EnchereBD extends ConnectionBD {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("L'offre donnée est inférieurs a l'offre en cours");
+			System.out.println("L'offre donnee est inferieure a l'offre en cours");
 		}
 		return false;
 	}
 
 	/**
-	 * Permet de récupérer la dernière enchere d'un objet
+	 * Permet de rï¿½cupï¿½rer la derniï¿½re enchere d'un objet
 	 * 
 	 * @param idobj
 	 *            Identifiant de l'objet

@@ -13,7 +13,7 @@ import java.sql.Statement;
  */
 public class ConnectionBD {
 	
-	protected String url = "jdbc:mysql://localhost/ProjSD";
+	protected String url = "jdbc:mysql://localhost/projetsd";
 	protected String login = "root";
 	protected String passwd = "";
 	protected Connection cn = null;
@@ -21,7 +21,7 @@ public class ConnectionBD {
 	protected ResultSet rs = null;
 	
 	/**
-	 * Permet d'initialiser une connection avec la base de donnée
+	 * Permet d'initialiser une connection avec la base de donnï¿½e
 	 */
 	public ConnectionBD() {
 		try {

@@ -112,6 +112,7 @@ public class ServiceClient implements Runnable {
 		ma_sortie.println("");
 		ma_sortie.println("Vous etez deja client chez nous? Oui/Non");
 		try {
+			System.out.println(flux_entrant.ready());
 			String reponse = flux_entrant.readLine();
 			if (reponse.contains("Oui")) {
 				continuerLogin(flux_entrant, ma_sortie);

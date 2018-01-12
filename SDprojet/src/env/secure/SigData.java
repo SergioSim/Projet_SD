@@ -2,6 +2,7 @@ package env.secure;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,8 +69,15 @@ public class SigData {
     	FileOutputStream sigfos = null;
     	Random rand = new Random();
     	int id = rand.nextInt();
+    	File f = new File("signatures");
 		try {
-			sigfos = new FileOutputStream("signatures/" + id + ".sig");
+			if (f.exists()) {
+				sigfos = new FileOutputStream("signatures/" + id + ".sig");
+			} else {
+				f.mkdir();
+				sigfos = new FileOutputStream("signatures/" + id + ".sig");
+			}
+			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

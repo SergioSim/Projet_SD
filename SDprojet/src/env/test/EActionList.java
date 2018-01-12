@@ -16,11 +16,7 @@ import java.util.Random;
 public enum EActionList {    
 	ACTION,
 	METTRE,
-//	RETRAIT ("Retrait "),
 	PLACER;
-//	ACHAT ("Achat "),
-//	CHERCHER ("Chercher "),
-//	AUTO ("Auto Encherir ");
     
     EActionList() {}
     
@@ -41,6 +37,7 @@ public enum EActionList {
     					(int)(Math.random() * (10)) + 0,
     					(int)(Math.random() * (1000)) + 1
     					);
+    			break;
     	}
     	return res;
     	

@@ -17,3 +17,5 @@ eviter vrai dialoguedes messages precisesverifier la coherence...
 
 Pour ajouter la gestion de base de donnée en Java, il faut faire la partie 2 du tutoriel suivant :
 http://www.objis.com/formation-java/tutoriel-java-acces-donnees-jdbc.html
+
+Penser à modifier dans bd.ConnectionBD l'URL de la base de données.

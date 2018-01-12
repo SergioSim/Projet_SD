@@ -7,9 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 import bd.ClientBD;
 import bd.EnchereBD;
@@ -72,7 +70,6 @@ public class ServiceClient implements Runnable {
 
 		login(flux_entrant, ma_sortie);
 		String message_lu = null;
-		int line_num = 0;
 		// Fin de l initialisation
 		// Boucle principale
 		if (message != null) {
@@ -96,8 +93,6 @@ public class ServiceClient implements Runnable {
 					terminer();
 					return;
 				}
-				//System.out.format("%s [line_%d]--> [%s]]\n", login, line_num, message_lu);
-				line_num++;
 			}
 		}
 
@@ -236,6 +231,7 @@ public class ServiceClient implements Runnable {
 		String a = "Achat ";
 		String c = "Chercher ";
 		String e = "Auto Enrechir ";
+		String af = "Afficher";
 		String[] commande;
 		String[] str = tabStr.split("//");
 		String message_lu = str[0];
@@ -247,13 +243,8 @@ public class ServiceClient implements Runnable {
 		}
 		
 		System.out.format("%s --> A fait : [%s]\n", login, message_lu);
-		
-		//System.out.println(message_lu);
-		//System.out.println(signature);		
-		//System.out.println(this.validSignature(message_lu, signature));
-		
+
 		if( (signature == -1) || (this.validSignature(message_lu, signature)) ) {
-//			System.out.println("Je suis le client n°" + this.id + ", j'ai fais la commande " + message_lu + " qui a pour ID de signature : " + signature);
 			if(signature != -1) {
 				this.deleteSignature(message_lu, signature);
 			}
@@ -264,16 +255,41 @@ public class ServiceClient implements Runnable {
 				if(commande.length != 5) {
 					ma_sortie.println("demande du client inconnue...");
 				} else {
+					try {
 					ObjetBD gdb = new ObjetBD();
-					gdb.AjouterObjet(commande[0], commande[1], commande[2],cbd.getIdClient(),Integer.parseInt(commande[3]),commande[4]);
+					boolean reussiteRequette = gdb.AjouterObjet(commande[0], commande[1], commande[2],cbd.getIdClient(),Integer.parseInt(commande[3]),commande[4]);
+					if(reussiteRequette) {
+						ma_sortie.println("la demmande du client est pris en compte");
+					} else {
+						ma_sortie.println("L'offre donn�e est inf�rieurs a l'offre en cours");
+					}
 					gdb.fermerCo();
+					}catch(NumberFormatException ex) {
+						ma_sortie.println("la demmande du client est invalide");
+					}
 				}
 			} if (message_lu.startsWith(r)) {
+				//Retrait idObject
 				message_lu = message_lu.replace(r,"");
 				commande = message_lu.split(" ");
+				if(commande.length != 1) {
+					ma_sortie.println("demande du client inconnue...");
+				}else {
+					try {
+						ObjetBD gdb = new ObjetBD();
+						boolean reussiteRequette = gdb.supprimerDansBase(Integer.parseInt(commande[0]));
+						if(reussiteRequette) {
+							ma_sortie.println("la demmande du client est pris en compte");
+						} else {
+							ma_sortie.println("L'offre donn�e est inf�rieurs a l'offre en cours");
+						}
+						gdb.fermerCo();
+					}catch(NumberFormatException ex) {
+						ma_sortie.println("la demmande du client est invalide");
+					}
+				}
 			} if (message_lu.startsWith(p)) {
 				//Placer IdObjet Prix
-				//AjouterEnch(int idobj, int Offre, int ench)
 				message_lu = message_lu.replace(p,"");
 				commande = message_lu.split(" ");
 				if(commande.length != 2) {
@@ -294,14 +310,39 @@ public class ServiceClient implements Runnable {
 			} if (message_lu.startsWith(a)) {
 				message_lu = message_lu.replace(a,"");
 				commande = message_lu.split(" ");
+				if(commande.length != 2) {
+					ma_sortie.println("demande du client inconnue...");
+				} else {
+					
+				}
 			} if (message_lu.startsWith(c)) {
+				//Chercher idObjet
 				message_lu = message_lu.replace(c,"");
 				commande = message_lu.split(" ");
+				if(commande.length != 1) {
+					ma_sortie.println("demande du client inconnue...");
+				} else {
+					try {
+					ObjetBD gdb = new ObjetBD();
+					ArrayList<String> reussiteRequette = gdb.chargeInfo(Integer.parseInt(commande[0]));
+					if(reussiteRequette.size() != 0) {
+						ma_sortie.println(reussiteRequette.toString());
+					} else {
+						ma_sortie.println("l'objet n'existe pas...");
+					}
+					gdb.fermerCo();
+				}catch(NumberFormatException ex) {
+					ma_sortie.println("la demmande du client est invalide");
+				}
+				}
 			} if (message_lu.startsWith(e)) {
 				message_lu = message_lu.replace(e,"");
 				commande = message_lu.split(" ");
-			} else {
-				//System.out.println(message_lu);
+			} else if (message_lu.startsWith(af)) {
+				ArrayList<String> reponse = new ObjetBD().afficherObjets();
+				if(reponse.size()!=0) {
+					reponse.forEach((s)-> ma_sortie.println(s));
+				}
 			}
 		} else {
 			ma_sortie.println("ERREUR : SIGNATURE DSA INVALIDE !!!");

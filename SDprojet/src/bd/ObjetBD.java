@@ -1,13 +1,10 @@
 package bd;
 
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 /**
  * 
@@ -100,17 +97,19 @@ public class ObjetBD extends ConnectionBD {
 	/**
 	 * Permet de lire toutes les informations pr�sentes dans la base
 	 */
-	public void afficherObjets() {
+	public ArrayList<String> afficherObjets() {
 		try {
 			String sql = "SELECT * FROM objet_en_vente";
+			ArrayList<String> resultat = new ArrayList<String>();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
-				System.out.println("Identifiant de l'objet: " + rs.getString("IdObjet") + " Titre: "
-						+ rs.getString("Titre") + " Description: " + rs.getString("Description") + " Categorie: "
-						+ rs.getString("IdCategorie") + " Prix: " + rs.getString("Prix") + "�");
+				resultat.add(String.format("Identifiant de l'objet: %s Titre: %s Description: %s Categorie: %s Prix: %s Euros",
+						rs.getString("IdObjet"),rs.getString("Titre"),rs.getString("Description"),rs.getString("IdCategorie"),rs.getString("Prix")) );
 			} // Vendeur, Ench, Prix, DateMiseVente, DateFinEnchere
+			return resultat;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return new ArrayList<String>();
 		}
 	}
 
@@ -120,17 +119,20 @@ public class ObjetBD extends ConnectionBD {
 	 * @param id
 	 *            Identifiant de l'objet
 	 */
-	public void chargeInfo(int id) {
+	public ArrayList<String> chargeInfo(int id) {
 		try {
 			String sql = "SELECT * FROM objet_en_vente WHERE IdObjet ='" + id + "'";
+			ArrayList<String> resultat = new ArrayList<String>();
 			rs = st.executeQuery(sql);
 			while (rs.next()) {
-				setAll(rs.getInt("IdObjet"), rs.getString("Titre"), rs.getString("Description"),
+				resultat.add(String.format("IdObjet: %s Titre: %s Description: %s IdCategorie: %s Vendeur: %s Ench: %s Prix: %s DateMiseVente: %s DateFinEnchere: %s",rs.getInt("IdObjet"), rs.getString("Titre"), rs.getString("Description"),
 						rs.getInt("IdCategorie"), rs.getInt("Vendeur"), rs.getBoolean("Ench"), rs.getInt("Prix"),
-						rs.getDate("DateMiseVente"), rs.getDate("DateFinEnchere"));
+						rs.getDate("DateMiseVente"), rs.getDate("DateFinEnchere")));
 			}
+			return resultat;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return new ArrayList<String>();
 		}
 	}
 
@@ -141,12 +143,14 @@ public class ObjetBD extends ConnectionBD {
 	 * @param id
 	 *            Identifiant de l'objet
 	 */
-	public void supprimerDansBase(int id) {
+	public boolean supprimerDansBase(int id) {
 		try {
 			String sql = "DELETE FROM `objet_en_vente` WHERE `IdObjet` ='" + id + "'";
 			st.executeUpdate(sql);
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 

@@ -43,9 +43,9 @@ public class GenClient {
 		String[] userNames = gen.genUserNames();
 		HashMap<String, String> pass = gen.genPasswords();
 		for (int i = 0; i < gen.getNbClients(); i++) {
-			Client le_client = new Client(500, 2, userNames[i], pass.get(userNames[i]));
+			Client le_client = new Client(100, 5, userNames[i], pass.get(userNames[i]));
 			Thread cl_thread = new Thread(le_client);
-			System.out.println("Client cree : arrivé de " + userNames[i] + " sur le serveur");
+			System.out.println("Client cree : arrivee de " + userNames[i] + " sur le serveur");
 			cl_thread.start();
 		}
 	}

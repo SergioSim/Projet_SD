@@ -16,7 +16,10 @@ import java.util.Random;
 public enum EActionList {    
 	ACTION,
 	METTRE,
-	PLACER;
+	RETRAIT,
+	PLACER,
+	CHERCHER,
+	AFFICHER;
     
     EActionList() {}
     
@@ -32,11 +35,20 @@ public enum EActionList {
     					LocalDateTime.now().format(DateTimeFormatter.ISO_DATE)
     					);
     			break;
+    		case RETRAIT :
+    			res = String.format("Retrait %s", (int)(Math.random() * (10)) + 1);
+    			break;
     		case PLACER :
     			res = String.format("Placer %s %s",
     					(int)(Math.random() * (10)) + 0,
     					(int)(Math.random() * (1000)) + 1
     					);
+    			break;
+    		case CHERCHER :
+    			res = String.format("Chercher %s", (int)(Math.random() * (10)) + 1);
+    			break;
+    		case AFFICHER :
+    			res = String.format("Afficher");
     			break;
     	}
     	return res;

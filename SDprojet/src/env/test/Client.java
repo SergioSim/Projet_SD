@@ -100,15 +100,16 @@ public class Client implements Runnable {
 	@Override
 	public void run() {
 		Socket laConnection = null;
+		int i;
 		try {
 			laConnection = new Socket(this.hote, this.port);
 			LogOn(laConnection, null);
-			for (int i = 0; i < this.limit; i++) {
-				//String data = console_input.next();
+			for (i = 0; i < this.limit; i++) {
 				doAction(laConnection, null);
 				Thread.sleep(this.delay);
 			}
 			LogOut(laConnection, null);
+			Thread.sleep(2000);
 			laConnection.close();
 		} catch (IOException e) {
 			System.out.format("Probleme de connection avec serveur fontionne : %s",e);

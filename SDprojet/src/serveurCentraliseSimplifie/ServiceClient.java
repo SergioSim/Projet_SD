@@ -76,15 +76,17 @@ public class ServiceClient implements Runnable {
 			System.out.println("le client a reussi de se connecter");
 			while (true) {
 				try {
-					message_lu = flux_entrant.readLine();
-					if (message_lu.toString().contains(Finish)) {
-						System.out.format("[%s] :  [%s] recu, Transmission finie\n", id, "CTRL-D");
-						ma_sortie.println("Fermeture de la connexion");
-						terminer();
-						return;
+					if(flux_entrant.ready()) {
+						message_lu = flux_entrant.readLine();
+						if (message_lu.contains(Finish)) {
+							System.out.format("[%s] :  [%s] recu, Transmission finie\n", id, "CTRL-D");
+							ma_sortie.println("Fermeture de la connexion");
+							terminer();
+							return;
+						}
+						messageListener(message_lu, ma_sortie);
+						message.addMessage(message_lu.toString());
 					}
-					messageListener(message_lu, ma_sortie);
-					message.addMessage(message_lu.toString());
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}
@@ -112,7 +114,6 @@ public class ServiceClient implements Runnable {
 		ma_sortie.println("");
 		ma_sortie.println("Vous etez deja client chez nous? Oui/Non");
 		try {
-			System.out.println(flux_entrant.ready());
 			String reponse = flux_entrant.readLine();
 			if (reponse.contains("Oui")) {
 				continuerLogin(flux_entrant, ma_sortie);
@@ -225,7 +226,7 @@ public class ServiceClient implements Runnable {
 		validator.deleteSig();
 	}
 	
-	private void messageListener(String tabStr, PrintWriter ma_sortie) {
+	private void messageListener(String tabStr, PrintWriter ma_sortie) {		
 		String m = "Mettre ";
 		String r = "Retrait ";
 		String p = "Placer ";
@@ -339,7 +340,7 @@ public class ServiceClient implements Runnable {
 			} if (message_lu.startsWith(e)) {
 				message_lu = message_lu.replace(e,"");
 				commande = message_lu.split(" ");
-			} else if (message_lu.startsWith(af)) {
+			} if (message_lu.startsWith(af)) {
 				ArrayList<String> reponse = new ObjetBD().afficherObjets();
 				if(reponse.size()!=0) {
 					reponse.forEach((s)-> ma_sortie.println(s));

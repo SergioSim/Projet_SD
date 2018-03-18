@@ -109,18 +109,20 @@ public class ClientBD extends ConnectionBD {
 	 * @param motdepasse
 	 *            Mot de passe du client
 	 */
-	public void ajouterClient(String nom, String prenom, String user, String motdepasse) {
+	public boolean ajouterClient(String nom, String prenom, String user, String motdepasse) {
 		try {
 			if (checkUser(user)) {
 				String sql = "INSERT INTO `client` (`Nom`,`Prenom`, User, MotDePasse ) VALUES ('" + nom + "', '"
 						+ prenom + "', '" + user + "', '" + motdepasse + "')";
 				st.executeUpdate(sql);
+				return true;
 			} else {
 				System.out.println("Nom d'utilisateur deja utilise");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 
 	/**

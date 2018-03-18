@@ -76,7 +76,7 @@ public class ServiceClient implements Runnable {
 			System.out.println("le client a reussi de se connecter");
 			while (true) {
 				try {
-					if(flux_entrant.ready()) {
+					//if(flux_entrant.ready()) {
 						message_lu = flux_entrant.readLine();
 						if (message_lu.contains(Finish)) {
 							System.out.format("[%s] :  [%s] recu, Transmission finie\n", id, "CTRL-D");
@@ -86,7 +86,7 @@ public class ServiceClient implements Runnable {
 						}
 						messageListener(message_lu, ma_sortie);
 						message.addMessage(message_lu.toString());
-					}
+					//}
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
 				}
@@ -176,7 +176,12 @@ public class ServiceClient implements Runnable {
 				e.printStackTrace();
 			}
 		} while (!confirm);
-		cbd.ajouterClient(nom, prenom, user, motdepasse);
+		boolean ajoute = cbd.ajouterClient(nom, prenom, user, motdepasse);
+		if(!ajoute) {
+			ma_sortie.println("Nom d'utilisateur deja utilise! on recommence!");
+		}else {
+			ma_sortie.println("compte cree!");
+		}
 		System.out.println("[Serveur]: Nouveau Client!");
 		System.out.println(String.format("nom = %s , prenom = %s , login = %s , motdepasse = %s", nom, prenom,
 				user, motdepasse));
@@ -198,6 +203,8 @@ public class ServiceClient implements Runnable {
 				}
 				if (!cbd.connectionClient(login, password)) {
 					ma_sortie.println("login ou mot de pass est incorrect! veuillez reessayer...");
+				}else {
+					ma_sortie.println("vous etes connecte!");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();

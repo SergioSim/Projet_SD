@@ -78,6 +78,11 @@ public class ServiceClient implements Runnable {
 				try {
 					//if(flux_entrant.ready()) {
 						message_lu = flux_entrant.readLine();
+						if (message_lu == null) {
+							System.out.println("Client deconnecté, je termine\n");
+							terminer();
+							return;
+						}
 						if (message_lu.contains(Finish)) {
 							System.out.format("[%s] :  [%s] recu, Transmission finie\n", id, "CTRL-D");
 							ma_sortie.println("Fermeture de la connexion");
@@ -89,11 +94,6 @@ public class ServiceClient implements Runnable {
 					//}
 				} catch (IOException ioe) {
 					ioe.printStackTrace();
-				}
-				if (message_lu == null) {
-					System.out.println("Client deconnecté, je termine\n");
-					terminer();
-					return;
 				}
 			}
 		}
@@ -270,7 +270,7 @@ public class ServiceClient implements Runnable {
 					if(reussiteRequette) {
 						ma_sortie.println("la demmande du client est pris en compte");
 					} else {
-						ma_sortie.println("L'offre donn�e est inf�rieurs a l'offre en cours");
+						ma_sortie.println("la demmande du client est invalide");
 					}
 					gdb.fermerCo();
 					}catch(NumberFormatException ex) {

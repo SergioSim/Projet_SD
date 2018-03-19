@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
 public class MessageHandler implements HttpHandler {
 
@@ -19,7 +20,12 @@ public class MessageHandler implements HttpHandler {
 	private String serveurIp = "127.0.0.1";
 	BufferedReader tampon_Lecture = null;
 	public Map<String, Object> myparameters = new HashMap<String, Object>();
+	private HttpServer server;
 	
+	public MessageHandler(MyHttp myHttp) {
+		this.server = myHttp.server;
+	}
+
 	@Override
 	public void handle(HttpExchange he) throws IOException {
 		errors = null;
@@ -62,17 +68,24 @@ public class MessageHandler implements HttpHandler {
 	        }
 	        
         }else if(myparameters.containsKey("mdp")) {
-        	printLine(3);
+        	String port = tampon_Lecture.readLine();
+        	port = port.replace("[", "");
+        	port = port.split("]")[0];
+        	printLine(2);
         	ma_sortie.println("Oui");
         	printLine(2);
         	ma_sortie.println(myparameters.get("login"));
 	        printLine(1);
 	        ma_sortie.println(myparameters.get("mdp"));
 	        printLine(1);
+	        long id = Math.round(Math.random() * 1000000 );
 	        if(errors == null) {
 	        	response = response + myparameters.get("login") +
 	        			" ! </H1> </br> <h3> login et mdp corrects ! </h3> " + 
-	        			" <p> Go Shopping! <a href=\"/tableauDeBord.html\">here</a></p>";
+	        			" <p> Go Shopping! <a href=\"/tableauDeBord"+"Port="+port+"Id="+id+"\">here</a></p>";
+	        	server.createContext("/getInfos"+"Port="+port+"Id="+id, new GetInfosHandler(tampon_Lecture,ma_sortie,port,id));
+	        	server.createContext("/tableauDeBord"+"Port="+port+"Id="+id, new TdbHandler(tampon_Lecture,ma_sortie,port,id));
+	        	server.createContext("/deconnection"+"Port="+port+"Id="+id, new DeconnectionHandler(tampon_Lecture,ma_sortie,port,id,server));
 	        }
         }
         
@@ -89,8 +102,8 @@ public class MessageHandler implements HttpHandler {
 	
 	public void printLine(int i) {
 		String response;
-		for(int z = i ; z > 0 ; z--) {
 			try {
+				while(tampon_Lecture.ready()){
 				response = tampon_Lecture.readLine();
 				System.out.println(response);
 				if(errors == null && 
@@ -101,9 +114,9 @@ public class MessageHandler implements HttpHandler {
 							response.contains("je termine"))) {
 					errors = response;
 				}
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-	}
 }

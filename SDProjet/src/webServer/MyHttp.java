@@ -9,15 +9,15 @@ import serveurCentraliseSimplifie.Repartiteur;
 
 public class MyHttp {
 	public static int port = 8080;
+	public HttpServer server;
 	
 	public void startServer() {
 		try {
-			HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+			server = HttpServer.create(new InetSocketAddress(port), 0);
 			System.out.println("http server started at " + port);
 			server.createContext("/", new RootHandler());
 			server.createContext("/inscription.html", new RootHandler("inscription.html"));
-			server.createContext("/message", new MessageHandler());
-			server.createContext("/tableauDeBord.html", new TdbHandler());
+			server.createContext("/message", new MessageHandler(this));
 			server.setExecutor(null);
 			server.start();
 

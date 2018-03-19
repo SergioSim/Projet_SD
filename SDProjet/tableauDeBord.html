@@ -1,12 +1,109 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="tdbcss.css">
+    <style>
+        h1 {
+            color: blue;
+        }
+
+        p {
+            color: red;
+        }
+
+        table {
+            border-collapse: collapse;
+            /* Les bordures du tableau seront coll�es (plus joli) */
+        }
+
+        td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
 <body>
 
-<h1>SDEbay</h1>
+    <h1>SDEbay</h1>
 
-<p>Ici c'est votre tableau de bord! </p>
-</br>
-<p> go back! <a href="/">here</a></p>
+    <p>Ici c'est votre tableau de bord! </p>
+    <p> messageImprtant</p>
+    <br>
 
+    <div id="afficher">
+    </div>
+    <br><br><br>
+    <p> creer un nouvelle enchere</p>
+    <form action="/tableauDeBordsupersecreturl" method="POST" onsubmit="setTimeout(function(){window.location.reload();},10)">
+        Titre:<br>
+        <input type="text" name="titre" value="">
+        <br>
+        Description:<br>
+        <input type="text" name="description" value="">
+        <br>
+        Categorie:<br>
+        <input type="text" name="categorie" value="1">
+        <br>
+        Prix:<br>
+        <input type="text" name="prix" value="0">
+        <br>
+        Date de fin<br>
+        <input type="text" name="fin" value="2018-10-10">
+        <br><br>
+        <input type="hidden" name="type" value="mettre">
+        <input type="submit" value="Confirmer!">
+      </form> 
+
+    <br><br><br>
+    <button onclick="deconnection()">Deconnection</button>
+    <p> go back!
+        <a href="/">here</a>
+    </p>
+    <script>
+
+        function init() {
+            var urlInfos = "http://localhost:8080/getInfos"+"supersecreturl";
+            sendInfo(urlInfos);
+            getInfo();
+        }
+        init();
+
+        var request;
+
+        function sendInfo(url) {
+
+            if (window.XMLHttpRequest) {
+                request = new XMLHttpRequest();
+            }
+            else if (window.ActiveXObject) {
+                request = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+            try {
+                request.onreadystatechange = getInfo;
+                request.open("GET", url, true);
+                request.send();
+            } catch (e) {
+                alert("Unable to connect to server");
+            }
+        }
+
+        function getInfo() {
+            if (request.readyState == 4) {
+                var val = request.responseText;
+                console.log(val);
+                document.getElementById('afficher').innerHTML = val;
+            }
+        }
+
+        function deconnection(){
+            var urlInfos = "http://localhost:8080/deconnection"+"supersecreturl";
+            sendInfo(urlInfos);
+            getInfo();
+        }
+
+    </script>
 </body>
+
 </html>
